@@ -1,0 +1,649 @@
+
+การสนทนากับ Gemini
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioIDNet - เทพพิทักษ์วิทยา</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --school-yellow: #fbc531; 
+            --school-yellow-light: #fde293; 
+            --school-dark: #2f3640; 
+            --school-black: #1e2229; 
+            --success-color: #2ecc71; 
+            --error-color: #e74c3c;
+            --text-color: #353b48;
+            --bg-color: #f5f6fa;
+            --card-bg: #ffffff;
+            --border-color: #dcdde1;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Header Section */
+        .page-header {
+            background: linear-gradient(135deg, var(--school-black) 0%, var(--school-dark) 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            border-bottom: 5px solid var(--school-yellow);
+            position: relative;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: clamp(1.6em, 5vw, 2.2em);
+        }
+
+        .page-header h1 i {
+            color: var(--school-yellow);
+            margin-right: 8px;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        .page-header p {
+            margin: 0.5rem 0 0;
+            font-size: clamp(0.95em, 3vw, 1.1em);
+            color: #f5f6fa;
+            opacity: 0.9;
+        }
+
+        .page-header .credits {
+            margin-top: 0.8rem;
+            font-size: clamp(0.85em, 2.5vw, 0.95em);
+            color: var(--school-yellow);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            display: inline-block;
+            padding: 4px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(251, 197, 49, 0.3);
+            animation: bounceIn 1s ease-out;
+        }
+
+        /* Main Content Section */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            gap: 1.5rem;
+        }
+
+        /* How-to-use Instructions Card */
+        .instruction-card {
+            background-color: var(--card-bg);
+            border-left: 5px solid var(--school-yellow);
+            padding: 1.2rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            width: 100%;
+            max-width: 950px;
+            box-sizing: border-box;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .instruction-card h3 {
+            margin: 0 0 0.8rem 0;
+            color: var(--school-dark);
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instruction-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.9em;
+            color: #57606f;
+        }
+
+        .step-number {
+            background-color: var(--school-yellow);
+            color: var(--school-black);
+            font-weight: bold;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.85em;
+        }
+
+        /* App Main Workspace */
+        .card-container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 950px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-sizing: border-box;
+            animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .two-column-layout {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+        }
+
+        .left-column, .right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+        
+        #image-preview {
+            width: 100%;
+            height: clamp(220px, 50vw, 350px);
+            border: 3px dashed var(--school-yellow);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-color: #f9f9f9;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        #image-preview.has-image {
+            border-style: solid;
+            border-color: var(--school-dark);
+            background-color: var(--school-black);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        #image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* อนิเมชั่นเส้นเลเซอร์ตอนสแกน */
+        .scanner-line {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, transparent, var(--school-yellow), transparent);
+            box-shadow: 0 0 8px var(--school-yellow);
+            animation: scan 2s linear infinite;
+            z-index: 10;
+        }
+
+        #image-preview.has-image .scanner-line {
+            display: block;
+        }
+
+        .placeholder-text {
+            color: #7f8c8d;
+            font-size: 1.05em;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .placeholder-text i {
+            font-size: 3rem;
+            color: var(--school-yellow);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(0.95em, 2.5vw, 1.05em);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .btn-primary {
+            background-color: var(--school-yellow);
+            color: var(--school-black);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--school-dark);
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-reset {
+            font-family: 'Sarabun', sans-serif;
+            background-color: transparent;
+            color: var(--school-dark);
+            border: 2px solid var(--school-dark);
+        }
+
+        .btn-reset:hover {
+            background-color: #636e72;
+            color: white;
+            border-color: #636e72;
+            transform: translateY(-3px);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Results Section */
+        #label-container {
+            text-align: left;
+            width: 100%;
+        }
+        
+        #label-container h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--school-dark);
+            font-size: 1.2em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 3px solid var(--school-yellow);
+            padding-bottom: 0.4rem;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1em;
+            background-color: #fdfdfd;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        .class-name {
+            font-weight: 600;
+            color: var(--school-dark);
+        }
+
+        .probability {
+            color: #27ae60;
+            font-weight: 700;
+            min-width: 70px;
+            text-align: right;
+            background: #e8f8f5;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Feedback Section (ระบบเก็บข้อมูลพัฒนาโมเดล) */
+        .feedback-box {
+            margin-top: 1.5rem;
+            background-color: #f8f9fa;
+            border: 1px dashed var(--border-color);
+            padding: 1.2rem;
+            border-radius: 8px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .feedback-box p {
+            margin: 0 0 0.8rem 0;
+            font-weight: 600;
+            font-size: 0.95em;
+            color: var(--school-dark);
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .btn-correct {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-correct:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrong {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .btn-wrong:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* Footer Section */
+        .page-footer {
+            background-color: var(--school-black);
+            color: #ffffff;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            font-size: 0.85em;
+            border-top: 4px solid var(--school-yellow);
+        }
+
+        .page-footer h4 {
+            margin: 0 0 0.4rem 0;
+            font-weight: 600;
+            color: var(--school-yellow);
+        }
+
+        .page-footer p {
+            margin: 0;
+            color: #bdc3c7;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 1; transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .two-column-layout {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .instruction-steps {
+                grid-template-columns: 1fr;
+                gap: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="page-header">
+        <h1><i class="fas fa-fingerprint"></i> BioIDNet</h1>
+        <p>ระบบวิเคราะห์จำแนกประเภทลายนิ้วมืออัจฉริยะ</p>
+        <div class="credits">
+            <i class="fas fa-graduation-cap"></i> ถูกพัฒนาจากโมเดลของนักเรียนชั้นมัธยมศึกษาปีที่ 3 โรงเรียนเทพพิทักษ์วิทยา จ.แพร่
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="instruction-card">
+            <h3><i class="fas fa-info-circle" style="color: var(--school-yellow);"></i> วิธีการใช้งานและร่วมพัฒนา AI</h3>
+            <div class="instruction-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div>กด <strong>"เลือกรูปภาพลายนิ้วมือ"</strong> เพื่ออัปโหลดภาพที่ต้องการตรวจสอบ</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div>รอระบบสแกนและแสดงผลลัพธ์เปอร์เซ็นต์ความแม่นยำที่แถบด้านขวา</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div><strong>ช่วยเหลือนักเรียน:</strong> กดประเมินว่า AI ทายถูกหรือผิด เพื่อส่งข้อมูลไปปรับปรุงโมเดล</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-container">
+            <div class="two-column-layout">
+                <div class="left-column">
+                    <div id="image-preview">
+                        <div class="scanner-line"></div>
+                        <p class="placeholder-text">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            เลือกรูปภาพลายนิ้วมือที่นี่ เพื่อเริ่มสแกน
+                        </p>
+                    </div>
+                    
+                    <label for="image-upload" class="btn btn-primary">
+                        <i class="fas fa-images"></i> เลือกรูปภาพลายนิ้วมือ
+                    </label>
+                    <input type="file" id="image-upload" accept="image/*">
+                    
+                    <button id="reset-button" class="btn btn-reset" style="display:none;">
+                        <i class="fas fa-sync-alt"></i> ล้างข้อมูล / รีเซ็ตใหม่
+                    </button>
+                </div>
+                
+                <div class="right-column">
+                    <div id="label-container">
+                        <h3><i class="fas fa-chart-pie"></i> ผลการวิเคราะห์จาก AI</h3>
+                    </div>
+
+                    <div id="feedback-container" class="feedback-box" style="display: none;">
+                        <p><i class="fas fa-tools" style="color:var(--school-yellow);"></i> ช่วยตรวจงาน AI: ผลลัพธ์นี้ถูกต้องหรือไม่?</p>
+                        <div class="feedback-buttons">
+                            <button class="btn btn-correct" onclick="submitFeedback(true)">
+                                <i class="fas fa-check-circle"></i> ถูกต้องจ้า
+                            </button>
+                            <button class="btn btn-wrong" onclick="submitFeedback(false)">
+                                <i class="fas fa-times-circle"></i> ยังไม่ถูกนะ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="page-footer">
+        <h4>&copy; 2026 BioIDNet Project</h4>
+        <p>พัฒนาโปรแกรมโดย Nawarat K.</p>
+        <p style="font-size: 0.9em; margin-top: 4px; color: var(--school-yellow);">
+            โรงเรียนเทพพิทักษ์วิทยา จังหวัดแพร่
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/lcf2lfdoe/";
+        let model, maxPredictions;
+        let currentTopPrediction = ""; // เก็บชื่อคลาสที่ทายได้สูงสุด ณ ขณะนั้น
+
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const labelContainer = document.getElementById('label-container');
+        const resetButton = document.getElementById('reset-button');
+        const feedbackContainer = document.getElementById('feedback-container');
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+            try {
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+            } catch (error) {
+                console.error("Failed to load model:", error);
+                labelContainer.innerHTML = "<h3><i class='fas fa-chart-pie'></i> ผลการวิเคราะห์จาก AI</h3><div style='color:#e74c3c; padding:10px; background:#fce4d6; border-radius:6px;'>❌ ขออภัย ไม่สามารถเชื่อมต่อกับฐานข้อมูลโมเดลได้</div>";
+            }
+        }
+
+        async function predict() {
+            const image = document.getElementById('uploaded-image');
+            if (model && image) {
+                try {
+                    const prediction = await model.predict(image, false);
+                    labelContainer.innerHTML = "<h3><i class='fas fa-chart-pie'></i> ผลการวิเคราะห์จาก AI</h3>";
+                    
+                    const sortedPrediction = prediction.sort((a, b) => b.probability - a.probability);
+                    
+                    // บันทึกผลลัพธ์อันดับ 1 ไว้ใช้ทำประวัติการบันทึกข้อมูล
+                    currentTopPrediction = sortedPrediction[0].className;
+
+                    sortedPrediction.forEach((p, index) => {
+                        const div = document.createElement("div");
+                        div.className = "prediction-item";
+                        div.style.animationDelay = `${index * 0.1}s`;
+                        
+                        div.innerHTML = `
+                            <span class="class-name"><i class="fas fa-fingerprint" style="color:var(--school-yellow); margin-right:5px;"></i> ${p.className}</span> 
+                            <span class="probability">${(p.probability * 100).toFixed(2)}%</span>
+                        `;
+                        labelContainer.appendChild(div);
+                    });
+                    
+                    resetButton.style.display = 'flex';
+                    feedbackContainer.style.display = 'block'; // แสดงกล่องโหวตความถูกต้อง
+                    imagePreview.classList.add('has-image');
+                } catch (error) {
+                    console.error("Prediction failed:", error);
+                    labelContainer.innerHTML = "<h3><i class='fas fa-chart-pie'></i> ผลการวิเคราะห์จาก AI</h3><div style='color:#e74c3c;'>เกิดข้อผิดพลาดในการประมวลผลลัพธ์ลายนิ้วมือ</div>";
+                }
+            }
+        }
+
+        // ระบบบันทึกข้อมูลป้อนกลับ (Feedback) เพื่อเอาไปพัฒนา Dataset ต่อ
+        function submitFeedback(isCorrect) {
+            const statusText = isCorrect ? "ถูกต้อง ✅" : "ไม่ถูกต้อง ❌";
+            
+            // ในขั้นตอนนี้ ข้อมูลจะถูกเก็บไว้บน Console Log เพื่อให้นักเรียนสามารถนำ Log ไปวิเคราะห์ทำสถิติได้
+            // หรือสามารถต่อยอดส่งข้อมูลไปยัง Google Sheets / Firebase ในอนาคตได้ครับ
+            console.log(`[Model Feedback Log] คลาสที่ทำนาย: ${currentTopPrediction} | ผลการประเมินจากผู้ใช้: ${statusText}`);
+            
+            // แสดงข้อความขอบคุณน่ารักๆ เมื่อกดส่งข้อมูลเสร็จ
+            feedbackContainer.innerHTML = `
+                <div style="color: var(--success-color); font-weight: bold; animation: popIn 0.3s ease;">
+                    <i class="fas fa-heart"></i> บันทึกข้อมูลแล้ว! ขอบคุณที่ช่วยพวกเราพัฒนาโมเดลนะคะ/ครับ
+                </div>
+            `;
+        }
+
+        imageUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.id = 'uploaded-image';
+                    img.src = e.target.result;
+                    
+                    img.onload = async () => {
+                        imagePreview.innerHTML = '<div class="scanner-line"></div>'; 
+                        imagePreview.appendChild(img);
+                        imagePreview.classList.add('has-image');
+                        await predict();
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        resetButton.addEventListener('click', () => {
+            imagePreview.innerHTML = `
+                <div class="scanner-line"></div>
+                <p class="placeholder-text">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    เลือกรูปภาพลายนิ้วมือที่นี่ เพื่อเริ่มสแกน
+                </p>
+            `;
+            labelContainer.innerHTML = "<h3><i class='fas fa-chart-pie'></i> ผลการวิเคราะห์จาก AI</h3>";
+            imageUpload.value = "";
+            resetButton.style.display = 'none';
+            
+            // รีเซ็ตหน้าตากล่อง Feedback กลับมาเหมือนเดิม
+            feedbackContainer.style.display = 'none';
+            feedbackContainer.innerHTML = `
+                <p><i class="fas fa-tools" style="color:var(--school-yellow);"></i> ช่วยตรวจงาน AI: ผลลัพธ์นี้ถูกต้องหรือไม่?</p>
+                <div class="feedback-buttons">
+                    <button class="btn btn-correct" onclick="submitFeedback(true)">
+                        <i class="fas fa-check-circle"></i> ถูกต้องจ้า
+                    </button>
+                    <button class="btn btn-wrong" onclick="submitFeedback(false)">
+                        <i class="fas fa-times-circle"></i> ยังไม่ถูกนะ
+                    </button>
+                </div>
+            `;
+            
+            imagePreview.classList.remove('has-image');
+        });
+
+        init();
+    </script>
+</body>
+</html>
